@@ -1,0 +1,26 @@
+{
+  "name": "@realmjs/dynamodb-helper",
+  "version": "1.0.0",
+  "description": "realmjs project: database driver helper for dynamodb",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "node test/test"
+  },
+  "keywords": [],
+  "author": "duongtdn",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/realmjs/dynamodb-helper.git"
+  },
+  "bugs": {
+    "url": "https://github.com/realmjs/dynamodb-helper/issues"
+  },
+  "homepage": "https://github.com/realmjs/dynamodb-helper#readme",
+  "dependencies": {
+    "aws-sdk": "^2.542.0"
+  },
+  "devDependencies": {
+    "dotenv": "^8.1.0"
+  }
+}
