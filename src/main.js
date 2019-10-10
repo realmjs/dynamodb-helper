@@ -128,7 +128,7 @@ class DatabseHelper {
   constructor(config) {
     const AWS = require('aws-sdk')
     if (config && config.aws && config.aws.region && config.aws.endpoint) {
-      AWS.config.update({ region: config.aws.region, endpoint: config.aws.endpoint })
+      AWS.config.update(config.aws)
     }
     const apiVersion = (config && config.apiVersion) || '2012-08-10'
     this.docClient = new AWS.DynamoDB.DocumentClient({ apiVersion })
