@@ -105,7 +105,6 @@ class DatabaseDriver {
   update(keys, update) {
     return new Promise( (resolve, reject) => {
       const expr = createUpdateExpression(update)
-      // resolve(expr); return
       this.docClient.update({
         TableName: this.table,
         Key: keys,
@@ -118,6 +117,41 @@ class DatabaseDriver {
           reject(err)
         } else {
           resolve(update)
+        }
+      })
+    })
+  }
+
+  /**
+   *Similar to update, but do not perform update in each child
+   * @param {Object} keys
+   * @param {Object} prop
+   * @return Promise
+   */
+  set(keys, prop) {
+    return new Promise( (resolve, reject) => {
+      const expr = { str: 'set', attr: { names: {}, values: {} } }
+      // set
+      for (let key in prop) {
+        const p = `#${key}`
+        const v = `:${key}`
+        expr.attr.names[p] = key
+        expr.attr.values[v] = prop[key]
+        expr.str += ` ${p} = ${v},`
+      }
+      expr.str = expr.str.replace(/,$/,'')
+      this.docClient.update({
+        TableName: this.table,
+        Key: keys,
+        UpdateExpression: expr.str,
+        ExpressionAttributeNames: expr.attr.names,
+        ExpressionAttributeValues: expr.attr.values,
+        ReturnValues:"UPDATED_NEW"
+      }, (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(prop)
         }
       })
     })
