@@ -199,7 +199,39 @@ class DatabseHelper {
     }
     return this
   }
-  batchGet() {}
+  /*
+    get item from multiple tables in batch mode, using key
+    Notes: batchGet does not support INDEX table
+           batchGet does not support expression in projection, therefore avoid to have projection contain dynamodb keywords such as roles...
+    ex. batchGet({
+      USERS: { keys: {uid: 'cafe-guy'}, projection: ['rewards'] },
+      ORDERS: { keys: {uid: 'cafe-guy', orderId: '123456'} }
+    })
+  */
+  batchGet(params) {
+    const RequestItems = {}
+    for (let table in params) {
+      RequestItems[table] = {
+        Keys: Object.keys(params[table].keys).map(k => {
+          const obj = {}
+          obj[k] = params[table].keys[k]
+          return obj
+        }),
+      }
+      if (params[table].projection) {
+        RequestItems[table].ProjectionExpression = params[table].projection.join(',')
+      }
+    }
+    return new Promise( (resolve, reject) => {
+      this.docClient.batchGet({ RequestItems }, (err, data) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(data.Responses)
+        }
+      })
+    })
+  }
   batchWrite() {}
 }
 

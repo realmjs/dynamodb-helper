@@ -13,6 +13,18 @@ dbh.addTable('USERS', {indexes: ['LOGIN']})
 /* Start execution time measurement */
 const hrstart = process.hrtime()
 
+dbh.drivers.batchGet({
+  CATALOG: {
+    keys: { catalogId: 'ca-emb'},
+    projection: ['title']
+  },
+  COURSES: {
+    keys: { courseId: 'emb-01' }
+  }
+})
+.then( data => log(data) )
+.catch( err => console.log(err) )
+
 /*
 
 dbh.drivers.USERS.find({ uid: '= 25d66490-f836-11e8-b04f-6b00a2182595' })
