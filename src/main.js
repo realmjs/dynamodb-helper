@@ -232,7 +232,37 @@ class DatabseHelper {
       })
     })
   }
-  batchWrite() {}
+  batchWrite(params) {
+    const RequestItems = {}
+    for (let table in params) {
+      RequestItems[table] = []
+      if (params[table].insert) {
+        const items = params[table].insert
+        RequestItems[table].push(...items.map(item => {
+          return {
+            PutRequest: { Item: item }
+          }
+        }))
+      }
+      if (params[table].remove) {
+        const keys = params[table].remove
+        RequestItems[table].push(...keys.map(key => {
+          return {
+            DeleteRequest: { Key: key }
+          }
+        }))
+      }
+    }
+    return new Promise( (resolve, reject) => {
+      this.docClient.batchWrite({ RequestItems }, (err, data) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(data.UnprocessedItems)
+        }
+      })
+    })
+  }
 }
 
 module.exports = DatabseHelper
