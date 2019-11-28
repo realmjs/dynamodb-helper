@@ -9,11 +9,16 @@ const dbh = new DatabaseHelper({
 })
 
 dbh.addTable('USERS', {indexes: ['LOGIN']})
+dbh.addTable(['ENROLL'])
 
 /* Start execution time measurement */
 const hrstart = process.hrtime()
 
 /*
+
+dbh.drivers.ENROLL.fetch()
+.then( data => log(data) )
+.catch( err => console.log(err) )
 
 dbh.drivers.batchWrite({
   ENROLL: {

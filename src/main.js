@@ -176,6 +176,22 @@ class DatabaseDriver {
       })
     })
   }
+
+  /**
+   * Fetch all items from a table
+   * @return Promise
+   */
+  fetch() {
+    return new Promise((resolve, reject) => {
+      this.docClient.scan({ TableName: this.table }, (err, data) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(data.Items)
+        }
+      })
+    })
+  }
 }
 
 class DatabseHelper {
