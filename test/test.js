@@ -26,11 +26,11 @@ dbh.drivers.batchWrite({
 
 dbh.drivers.batchGet({
   CATALOG: {
-    keys: { catalogId: 'ca-emb'},
+    keys: [{ catalogId: 'ca-emb'}],
     projection: ['title']
   },
   COURSES: {
-    keys: { courseId: 'emb-01' }
+    keys: [{ courseId: 'emb-01' }]
   }
 })
 .then( data => log(data) )
@@ -69,6 +69,10 @@ dbh.drivers.USERS.update({ uid: 'cafeguy'}, {
   },
   verified: true
 })
+.then( data => log(data) )
+.catch( err => console.log(err) )
+
+dbh.drivers.USERS.remove({ uid: 'ebf3b030-eedd-11e9-bd64-a992427cec0f'})
 .then( data => log(data) )
 .catch( err => console.log(err) )
 

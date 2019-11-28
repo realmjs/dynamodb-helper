@@ -123,7 +123,7 @@ class DatabaseDriver {
   }
 
   /**
-   *Similar to update, but do not perform update in each child
+   * Similar to update, but do not perform update in each child
    * @param {Object} keys
    * @param {Object} prop
    * @return Promise
@@ -152,6 +152,26 @@ class DatabaseDriver {
           reject(err)
         } else {
           resolve(prop)
+        }
+      })
+    })
+  }
+
+  /**
+   * Remove one item from a table
+   * To remove more than one item, use batchWrite instead
+   * Currently, it does not support remove from indexed
+   * @param {Object} keys
+   * @return Promise
+   */
+  remove(keys) {
+    console.log({ TableName: this.table, Key: keys })
+    return new Promise((resolve, reject) => {
+      this.docClient.delete({ TableName: this.table, Key: keys }, (err, data) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
         }
       })
     })
@@ -202,8 +222,9 @@ class DatabseHelper {
   /*
     get item from multiple tables in batch mode, using key
     Notes: batchGet does not support INDEX table
-           batchGet does not support expression in projection, therefore avoid to have projection contain dynamodb keywords such as roles...
-    ex. batchGet({
+           batchGet curently does not support expression in projection, therefore avoid to have projection contain dynamodb keywords such as roles...
+           batchGet required both hash and range keys for composite primary key
+    ex. dbh.drivers.batchGet({
       USERS: { keys: {uid: 'cafe-guy'}, projection: ['rewards'] },
       ORDERS: { keys: {uid: 'cafe-guy', orderId: '123456'} }
     })
@@ -212,16 +233,13 @@ class DatabseHelper {
     const RequestItems = {}
     for (let table in params) {
       RequestItems[table] = {
-        Keys: Object.keys(params[table].keys).map(k => {
-          const obj = {}
-          obj[k] = params[table].keys[k]
-          return obj
-        }),
+        Keys: params[table].keys
       }
       if (params[table].projection) {
         RequestItems[table].ProjectionExpression = params[table].projection.join(',')
       }
     }
+    console.log(JSON.stringify(RequestItems, null, 4))
     return new Promise( (resolve, reject) => {
       this.docClient.batchGet({ RequestItems }, (err, data) => {
         if (err) {
@@ -232,6 +250,15 @@ class DatabseHelper {
       })
     })
   }
+  /*
+    write/remove items to multiple tables in batch mode,
+    ex. dbh.drivers.batchWrite({
+        ENROLL: {
+          insert: [{ uid: 'usr1', courseId: 'e1'},{ uid: 'usr1', courseId: 'e2'}],
+          remove: [{ uid: 'usr2', courseId: 'e1'},{ uid: 'usr2', courseId: 'e2'}]
+        }
+      })
+  */
   batchWrite(params) {
     const RequestItems = {}
     for (let table in params) {
