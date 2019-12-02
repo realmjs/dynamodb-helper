@@ -45,7 +45,7 @@ dbh.drivers.USERS.find({ uid: '= 25d66490-f836-11e8-b04f-6b00a2182595' })
          .then( expr => log(expr) )
          .catch( err => console.log(err) )
 
-dbh.drivers.LOGIN.find({ username: '= tester@team.com' })
+dbh.drivers.LOGIN.find({ username: '= tester@team.com' }, ['username', 'uid', 'profile.fullName'])
          .then( expr => log(expr) )
          .catch( err => console.log(err) )
 

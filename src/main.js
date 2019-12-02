@@ -54,12 +54,13 @@ class DatabaseDriver {
   /**
    * Find one or more documents using keys
    * @param {Object} keys
+   * * @param {Object} projection
    * @return Promise
    * ex. find({ uid: '= cafeguy', publish: '> 1570198352200' })
    *          .then( docs => console.log(docs) )
    *          .catch( err => console.log(err) )
    */
-  find(keys) {
+  find(keys, projection) {
     return new Promise( (resolve, reject) => {
       const expr = createKeyConditionExpression(keys)
       const params = {
@@ -69,6 +70,7 @@ class DatabaseDriver {
         ExpressionAttributeValues: expr.attr.values
       }
       if (this.index) { params.IndexName = this.index }
+      if (projection) { params.ProjectionExpression = projection.join(',') }
       this.docClient.query( params, (err, data) => {
         if (err) {
           reject(err)
