@@ -167,7 +167,6 @@ class DatabaseDriver {
    * @return Promise
    */
   remove(keys) {
-    console.log({ TableName: this.table, Key: keys })
     return new Promise((resolve, reject) => {
       this.docClient.delete({ TableName: this.table, Key: keys }, (err, data) => {
         if (err) {
@@ -257,7 +256,6 @@ class DatabseHelper {
         RequestItems[table].ProjectionExpression = params[table].projection.join(',')
       }
     }
-    console.log(JSON.stringify(RequestItems, null, 4))
     return new Promise( (resolve, reject) => {
       this.docClient.batchGet({ RequestItems }, (err, data) => {
         if (err) {
