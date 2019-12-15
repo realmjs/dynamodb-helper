@@ -1,5 +1,7 @@
 "use strict"
 
+const time = require('./time-measure')
+
 function createUpdateExpression(update) {
   const expr = { str: 'set', attr: { names: {}, values: {} } }
   const __recursive = (update, parent) => {
@@ -49,6 +51,9 @@ class DatabaseDriver {
     this.table = table
     this.index = (options && options.index) || null
     this.docClient = docClient
+    for (let prop in options) {
+      this[prop] = options[prop]
+    }
   }
 
   /**
@@ -71,7 +76,9 @@ class DatabaseDriver {
       }
       if (this.index) { params.IndexName = this.index }
       if (projection) { params.ProjectionExpression = projection.join(',') }
+      const t = time.measure.start()
       this.docClient.query( params, (err, data) => {
+        time.measure.end(t, `Find item in table ${this.table}`)
         if (err) {
           reject(err)
         } else {
@@ -88,7 +95,9 @@ class DatabaseDriver {
    */
   insert(doc) {
     return new Promise( (resolve, reject) => {
+      const t = time.measure.start()
       this.docClient.put({ TableName: this.table, Item: doc }, (err) => {
+        this.measure.end(t, `Insert item into table ${this.table}`)
         if (err) {
           reject(err)
         } else {
@@ -107,6 +116,7 @@ class DatabaseDriver {
   update(keys, update) {
     return new Promise( (resolve, reject) => {
       const expr = createUpdateExpression(update)
+      const t = time.measure.start()
       this.docClient.update({
         TableName: this.table,
         Key: keys,
@@ -115,6 +125,7 @@ class DatabaseDriver {
         ExpressionAttributeValues: expr.attr.values,
         ReturnValues:"UPDATED_NEW"
       }, (err) => {
+        this.measure.end(t, `Update item in table ${this.table}`)
         if (err) {
           reject(err)
         } else {
@@ -142,6 +153,7 @@ class DatabaseDriver {
         expr.str += ` ${p} = ${v},`
       }
       expr.str = expr.str.replace(/,$/,'')
+      const t = time.measure.start()
       this.docClient.update({
         TableName: this.table,
         Key: keys,
@@ -150,6 +162,7 @@ class DatabaseDriver {
         ExpressionAttributeValues: expr.attr.values,
         ReturnValues:"UPDATED_NEW"
       }, (err) => {
+        time.measure.end(t, `Set item in table ${this.table}`)
         if (err) {
           reject(err)
         } else {
@@ -168,7 +181,9 @@ class DatabaseDriver {
    */
   remove(keys) {
     return new Promise((resolve, reject) => {
+      const t = time.measure.start()
       this.docClient.delete({ TableName: this.table, Key: keys }, (err, data) => {
+        this.measure.end(t, `Remove item from table ${this.table}`)
         if (err) {
           reject(err)
         } else {
@@ -184,7 +199,9 @@ class DatabaseDriver {
    */
   fetch() {
     return new Promise((resolve, reject) => {
+      const t = time.measure.start()
       this.docClient.scan({ TableName: this.table }, (err, data) => {
+        time.measure.end(t, `Fetch (scan) from table ${this.table}`)
         if (err) {
           reject(err)
         } else {
@@ -207,6 +224,8 @@ class DatabseHelper {
       batchGet: this.batchGet.bind(this),
       batchWrite: this.batchWrite.bind(this)
     }
+    this.config = config
+    time.measure.config({ measureExecutionTime: config.measureExecutionTime })
   }
   /*
     table can be a String or an Array of String or Object
@@ -218,20 +237,20 @@ class DatabseHelper {
     if ({}.toString.call(table)  === '[object Array]') {
       table.forEach( t => {
         if ({}.toString.call(table)  === '[object Object]') {
-          this.drivers[t.table] = new DatabaseDriver(this.docClient, t.table)
+          this.drivers[t.table] = new DatabaseDriver(this.docClient, t.table, { ...this.config })
           if (t.indexes) {
             t.indexes.forEach( index => {
-              this.drivers[index] = new DatabaseDriver(this.docClient, t.table, { index: t.index })
+              this.drivers[index] = new DatabaseDriver(this.docClient, t.table, { index: t.index, ...this.config })
             })
           }
         } else {
-          this.drivers[t] = new DatabaseDriver(this.docClient, t)
+          this.drivers[t] = new DatabaseDriver(this.docClient, t, { ...this.config })
         }
       })
     } else {
-      this.drivers[table] = new DatabaseDriver(this.docClient, table)
+      this.drivers[table] = new DatabaseDriver(this.docClient, table, { ...this.config })
       if (options && options.indexes) {
-        options.indexes.forEach( index => this.drivers[index] = new DatabaseDriver(this.docClient, table, { index }))
+        options.indexes.forEach( index => this.drivers[index] = new DatabaseDriver(this.docClient, table, { index, ...this.config }))
       }
     }
     return this
@@ -257,7 +276,9 @@ class DatabseHelper {
       }
     }
     return new Promise( (resolve, reject) => {
+      const t = time.measure.start()
       this.docClient.batchGet({ RequestItems }, (err, data) => {
+        time.measure.end(t, `BatchGet item from tables: ${Object.keys(params)}`)
         if (err) {
           reject(err)
         } else {
@@ -297,7 +318,9 @@ class DatabseHelper {
       }
     }
     return new Promise( (resolve, reject) => {
+      const t = time.measure.start()
       this.docClient.batchWrite({ RequestItems }, (err, data) => {
+        time.measure.end(t, `BatchWrite to tables: ${Object.keys(params)}`)
         if (err) {
           reject(err)
         } else {

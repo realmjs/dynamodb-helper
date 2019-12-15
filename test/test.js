@@ -6,13 +6,11 @@ const DatabaseHelper = require('../src/main')
 
 const dbh = new DatabaseHelper({
   aws: { region: process.env.AWS_REGION, endpoint: process.env.AWS_ENDPOINT },
+  measureExecutionTime: true
 })
 
 dbh.addTable('USERS', {indexes: ['LOGIN']})
 dbh.addTable(['ENROLL'])
-
-/* Start execution time measurement */
-const hrstart = process.hrtime()
 
 /*
 
@@ -84,10 +82,7 @@ dbh.drivers.USERS.remove({ uid: 'ebf3b030-eedd-11e9-bd64-a992427cec0f'})
 */
 
 function log(data) {
-  const hrend = process.hrtime(hrstart)
-  console.log('\n-----------------------------------------------------------')
-  console.log('-  Execution time (hr): %ds %dms', hrend[0], hrend[1] / 1000000)
-  console.log('-----------------------------------------------------------')
   console.log('Output results:')
   console.log(data)
+  console.log()
 }
