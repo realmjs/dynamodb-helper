@@ -97,7 +97,7 @@ class DatabaseDriver {
     return new Promise( (resolve, reject) => {
       const t = time.measure.start()
       this.docClient.put({ TableName: this.table, Item: doc }, (err) => {
-        this.measure.end(t, `Insert item into table ${this.table}`)
+        time.measure.end(t, `Insert item into table ${this.table}`)
         if (err) {
           reject(err)
         } else {
@@ -125,7 +125,7 @@ class DatabaseDriver {
         ExpressionAttributeValues: expr.attr.values,
         ReturnValues:"UPDATED_NEW"
       }, (err) => {
-        this.measure.end(t, `Update item in table ${this.table}`)
+        time.measure.end(t, `Update item in table ${this.table}`)
         if (err) {
           reject(err)
         } else {
@@ -183,7 +183,7 @@ class DatabaseDriver {
     return new Promise((resolve, reject) => {
       const t = time.measure.start()
       this.docClient.delete({ TableName: this.table, Key: keys }, (err, data) => {
-        this.measure.end(t, `Remove item from table ${this.table}`)
+        time.measure.end(t, `Remove item from table ${this.table}`)
         if (err) {
           reject(err)
         } else {
