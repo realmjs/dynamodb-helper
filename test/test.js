@@ -4,13 +4,28 @@ require('dotenv').config()
 
 const DatabaseHelper = require('../src/main')
 
+const aws = { region: process.env.REGION, endpoint: process.env.ENDPOINT }
+if (process.env.PROXY) {
+  console.log('# User proxy-agent')
+  const proxy = require('proxy-agent')
+  aws.httpOptions = { agent: proxy(process.env.PROXY) }
+}
+
 const dbh = new DatabaseHelper({
-  aws: { region: process.env.AWS_REGION, endpoint: process.env.AWS_ENDPOINT },
+  aws,
   measureExecutionTime: true
 })
 
 dbh.addTable('USERS', {indexes: ['LOGIN']})
-dbh.addTable(['ENROLL'])
+dbh.addTable(['ENROLL', 'PROGRAM', 'COURSE'])
+
+// dbh.drivers.LOGIN.find({ username: '= tester@team.com' }, ['username', 'uid', 'profile.fullName'])
+//          .then( expr => log(expr) )
+//          .catch( err => console.log(err) )
+
+dbh.drivers.COURSE.fetch()
+         .then( expr => log(expr) )
+         .catch( err => console.log(err) )
 
 /*
 

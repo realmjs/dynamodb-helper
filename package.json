@@ -18,9 +18,10 @@
   },
   "homepage": "https://github.com/realmjs/dynamodb-helper#readme",
   "dependencies": {
-    "aws-sdk": "^2.542.0"
+    "aws-sdk": "^2.590.0"
   },
   "devDependencies": {
-    "dotenv": "^8.1.0"
+    "dotenv": "^8.2.0",
+    "proxy-agent": "^3.1.1"
   }
 }
