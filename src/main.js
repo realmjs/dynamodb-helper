@@ -268,8 +268,10 @@ class DatabseHelper {
   batchGet(params) {
     const RequestItems = {}
     for (let table in params) {
-      RequestItems[table] = {
-        Keys: params[table].keys
+      if (params[table].keys && params[table].keys.length > 0) {
+        RequestItems[table] = {
+          Keys: params[table].keys
+        }
       }
       if (params[table].projection) {
         RequestItems[table].ProjectionExpression = params[table].projection.join(',')
