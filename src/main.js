@@ -45,6 +45,18 @@ function createKeyConditionExpression(keys) {
   return expr
 }
 
+function createProjectionExpression(projection) {
+  if (!projection) {
+    return { str: null, attr: {} }
+  }
+  const expr = { str: '', attr: {} }
+  projection.forEach( p => {
+    expr.attr[`#${p}`] = p
+  })
+  expr.str = projection.map( p => `#${p}`).join(',')
+  return expr
+}
+
 /** Class representing a database driver */
 class DatabaseDriver {
   constructor(docClient, table, options) {
@@ -68,14 +80,15 @@ class DatabaseDriver {
   find(keys, projection) {
     return new Promise( (resolve, reject) => {
       const expr = createKeyConditionExpression(keys)
+      const prj = createProjectionExpression(projection)
       const params = {
         TableName: this.table,
         KeyConditionExpression: expr.str,
-        ExpressionAttributeNames: expr.attr.names,
+        ExpressionAttributeNames: {...expr.attr.names, ...prj.attr},
         ExpressionAttributeValues: expr.attr.values
       }
       if (this.index) { params.IndexName = this.index }
-      if (projection) { params.ProjectionExpression = projection.join(',') }
+      if (projection) { params.ProjectionExpression = prj.str }
       const t = time.measure.start()
       this.docClient.query( params, (err, data) => {
         time.measure.end(t, `Find item in table ${this.table}`)

@@ -23,7 +23,7 @@ dbh.addTable(['ENROLL', 'PROGRAM', 'COURSE'])
 //          .then( expr => log(expr) )
 //          .catch( err => console.log(err) )
 
-dbh.drivers.COURSE.fetch()
+dbh.drivers.ENROLL.find({enrollTo: '= 220f71d0-2800-11ea-91a8-9f528720b885', courseId: '= c-01'}, ['status'])
          .then( expr => log(expr) )
          .catch( err => console.log(err) )
 
