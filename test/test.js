@@ -19,13 +19,13 @@ const dbh = new DatabaseHelper({
 dbh.addTable('USERS', {indexes: ['LOGIN']})
 dbh.addTable(['ENROLL', 'PROGRAM', 'COURSE'])
 
-// dbh.drivers.LOGIN.find({ username: '= tester@team.com' }, ['username', 'uid', 'profile.fullName'])
-//          .then( expr => log(expr) )
-//          .catch( err => console.log(err) )
-
-dbh.drivers.ENROLL.find({enrollTo: '= 220f71d0-2800-11ea-91a8-9f528720b885', courseId: '= c-01'}, ['status'])
+dbh.drivers.LOGIN.find({ username: '= tester@team.com' })
          .then( expr => log(expr) )
          .catch( err => console.log(err) )
+
+// dbh.drivers.ENROLL.find({enrollTo: '= 220f71d0-2800-11ea-91a8-9f528720b885', courseId: '= c-01'}, ['status'])
+//          .then( expr => log(expr) )
+//          .catch( err => console.log(err) )
 
 /*
 

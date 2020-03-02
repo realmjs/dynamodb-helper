@@ -36,9 +36,12 @@ function createKeyConditionExpression(keys) {
   const _keys = ['#hkey', '#rkey']
   const _vals = [':hval', ':rval']
   Object.keys(keys).forEach( (key, index) => {
-    const value = keys[key].replace(/\s.*$/,` ${_vals[index]}`)
+    const _v = keys[key].trim()
+    const _v_op = _v.match(/^\W+/)[0].trim()
+    const _v_val = _v.match(/^\W+(.*)/)[1].trim()
+    const value = `${_v_op} ${_vals[index]}`
     expr.attr.names[_keys[index]] = key
-    expr.attr.values[_vals[index]] = keys[key].match(/\s.*$/)[0].trim()
+    expr.attr.values[_vals[index]] = _v_val
     if (index > 0) { expr.str += ' and ' }
     expr.str += `${_keys[index]} ${value}`
   })
