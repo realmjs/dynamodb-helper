@@ -60,6 +60,20 @@ function createProjectionExpression(projection) {
   return expr
 }
 
+function createFilterExpression(filter) {
+  const expr = { str: '', attr: { names:{}, values: {} } }
+  filter && Object.keys(filter).forEach( (key, index) => {
+    const _cond = filter[key].trim()
+    const _cond_op = _cond.match(/^\W+/)[0].trim()
+    const _cond_val = _cond.match(/^\W+(.*)/)[1].trim()
+    expr.attr.names[`#k_${key}_f`] = key
+    expr.attr.values[`:v_${key}_f`] = _cond_val
+    if (index > 0) { expr.str += ' and ' }
+    expr.str += `#k_${key}_f ${_cond_op} :v_${key}_f`
+  })
+  return expr
+}
+
 /** Class representing a database driver */
 class DatabaseDriver {
   constructor(docClient, table, options) {
@@ -80,18 +94,20 @@ class DatabaseDriver {
    *          .then( docs => console.log(docs) )
    *          .catch( err => console.log(err) )
    */
-  find(keys, projection) {
+  find(keys, projection, filter) {
     return new Promise( (resolve, reject) => {
       const expr = createKeyConditionExpression(keys)
       const prj = createProjectionExpression(projection)
+      const fil = createFilterExpression(filter)
       const params = {
         TableName: this.table,
         KeyConditionExpression: expr.str,
-        ExpressionAttributeNames: {...expr.attr.names, ...prj.attr},
-        ExpressionAttributeValues: expr.attr.values
+        ExpressionAttributeNames: {...expr.attr.names, ...prj.attr, ...fil.attr.names},
+        ExpressionAttributeValues: {...expr.attr.values, ...fil.attr.values}
       }
       if (this.index) { params.IndexName = this.index }
       if (projection) { params.ProjectionExpression = prj.str }
+      if (filter) { params.FilterExpression = fil.str }
       const t = time.measure.start()
       this.docClient.query( params, (err, data) => {
         time.measure.end(t, `Find item in table ${this.table}`)

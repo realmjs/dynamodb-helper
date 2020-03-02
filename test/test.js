@@ -19,7 +19,7 @@ const dbh = new DatabaseHelper({
 dbh.addTable('USERS', {indexes: ['LOGIN']})
 dbh.addTable(['ENROLL', 'PROGRAM', 'COURSE'])
 
-dbh.drivers.LOGIN.find({ username: '= tester@team.com' })
+dbh.drivers.LOGIN.find({ username: '= tester@team.com' }, ['profile'])
          .then( expr => log(expr) )
          .catch( err => console.log(err) )
 
