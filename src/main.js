@@ -94,7 +94,7 @@ class DatabaseDriver {
    *          .then( docs => console.log(docs) )
    *          .catch( err => console.log(err) )
    */
-  find(keys, projection, filter) {
+  find(keys, projection, filter, options) {
     return new Promise( (resolve, reject) => {
       const expr = createKeyConditionExpression(keys)
       const prj = createProjectionExpression(projection)
@@ -103,7 +103,8 @@ class DatabaseDriver {
         TableName: this.table,
         KeyConditionExpression: expr.str,
         ExpressionAttributeNames: {...expr.attr.names, ...prj.attr, ...fil.attr.names},
-        ExpressionAttributeValues: {...expr.attr.values, ...fil.attr.values}
+        ExpressionAttributeValues: {...expr.attr.values, ...fil.attr.values},
+        ...options
       }
       if (this.index) { params.IndexName = this.index }
       if (projection) { params.ProjectionExpression = prj.str }
