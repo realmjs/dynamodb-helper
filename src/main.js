@@ -22,7 +22,7 @@ function createUpdateExpression(update) {
         /* create the value which is the rhs in the expression equation */
         const v = `:${p}v${index}`
         expr.str += ` ${path} = ${v},`
-        expr.attr.values[v] = val
+        expr.attr.values[v] = isNaN(val) ? val : parseFloat(val)
       }
     })
   }
@@ -41,7 +41,7 @@ function createKeyConditionExpression(keys) {
     const _v_val = _v.match(/^\W+(.*)/)[1].trim()
     const value = `${_v_op} ${_vals[index]}`
     expr.attr.names[_keys[index]] = key
-    expr.attr.values[_vals[index]] = _v_val
+    expr.attr.values[_vals[index]] = isNaN(_v_val) ? _v_val : parseFloat(_v_val)
     if (index > 0) { expr.str += ' and ' }
     expr.str += `${_keys[index]} ${value}`
   })
@@ -67,7 +67,7 @@ function createFilterExpression(filter) {
     const _cond_op = _cond.match(/^\W+/)[0].trim()
     const _cond_val = _cond.match(/^\W+(.*)/)[1].trim()
     expr.attr.names[`#k_${key}_f`] = key
-    expr.attr.values[`:v_${key}_f`] = _cond_val
+    expr.attr.values[`:v_${key}_f`] = isNaN(_cond_val) ? _cond_val : parseFloat(_cond_val)
     if (index > 0) { expr.str += ' and ' }
     expr.str += `#k_${key}_f ${_cond_op} :v_${key}_f`
   })
