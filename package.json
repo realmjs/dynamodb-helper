@@ -1,6 +1,6 @@
 {
   "name": "@realmjs/dynamodb-helper",
-  "version": "1.6.1",
+  "version": "1.7.0",
   "description": "realmjs project: database driver helper for dynamodb",
   "main": "src/main.js",
   "scripts": {
@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/realmjs/dynamodb-helper#readme",
   "dependencies": {
-    "aws-sdk": "^2.590.0"
+    "aws-sdk": "^2.635.0"
   },
   "devDependencies": {
     "dotenv": "^8.2.0",

@@ -17,11 +17,15 @@ const dbh = new DatabaseHelper({
 })
 
 dbh.addTable('USERS', {indexes: ['LOGIN']})
-dbh.addTable(['ORDER'])
+dbh.addTable(['ORDER', 'MEMBER'])
 
-dbh.drivers.ORDER.find({ uid: '= 220f71d0-2800-11ea-91a8-9f528720b885' }, ['number'], null, {Limit: 2, ScanIndexForward: false})
-         .then( expr => log(expr) )
-         .catch( err => console.log(err) )
+dbh.drivers.MEMBER.remove({ uid: '220f71d0-2800-11ea-91a8-9f528720b885' }, ['rewards.welcome', 'rewards.booster'])
+.then( expr => log(expr))
+.catch(err => console.log(err))
+
+// dbh.drivers.ORDER.find({ uid: '= 220f71d0-2800-11ea-91a8-9f528720b885' }, ['number'], null, {Limit: 2, ScanIndexForward: false})
+//          .then( expr => log(expr) )
+//          .catch( err => console.log(err) )
 
 // dbh.drivers.ENROLL.find({enrollTo: '= 220f71d0-2800-11ea-91a8-9f528720b885', courseId: '= c-01'}, ['status'])
 //          .then( expr => log(expr) )

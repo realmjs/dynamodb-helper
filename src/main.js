@@ -31,6 +31,17 @@ function createUpdateExpression(update) {
   return expr
 }
 
+function createRemoveExpression(attributes) {
+  const expr = { str: 'remove', attr: {} }
+  attributes.forEach(key => {
+    const attrs = key.split('.')
+    attrs.forEach(a => { expr.attr[`#${a}`] = a })
+    expr.str += ' ' + attrs.map(a => `#${a}`).join('.') + ','
+  })
+  expr.str = expr.str.replace(/,$/,'')
+  return expr
+}
+
 function createKeyConditionExpression(keys) {
   const expr = { str: '', attr: { names: {}, values: {} } }
   const _keys = ['#hkey', '#rkey']
@@ -206,23 +217,43 @@ class DatabaseDriver {
   }
 
   /**
-   * Remove one item from a table
+   * Remove one item or attributes of item from a table
    * To remove more than one item, use batchWrite instead
+   * If attrs is not provided, remove item
    * Currently, it does not support remove from indexed
    * @param {Object} keys
+   * @param {Array} attrs
    * @return Promise
    */
-  remove(keys) {
+  remove(keys, attrs) {
     return new Promise((resolve, reject) => {
       const t = time.measure.start()
-      this.docClient.delete({ TableName: this.table, Key: keys }, (err, data) => {
-        time.measure.end(t, `Remove item from table ${this.table}`)
-        if (err) {
-          reject(err)
-        } else {
-          resolve()
-        }
-      })
+      if (attrs && attrs.length > 0) {
+        const expr = createRemoveExpression(attrs)
+        this.docClient.update({
+          TableName: this.table,
+          Key: keys,
+          UpdateExpression: expr.str,
+          ExpressionAttributeNames: expr.attr,
+          ReturnValues:"UPDATED_NEW"
+        }, (err) => {
+          time.measure.end(t, `Remove attribute of item from table ${this.table}`)
+          if (err) {
+            reject(err)
+          } else {
+            resolve(attrs)
+          }
+        })
+      } else {
+        this.docClient.delete({ TableName: this.table, Key: keys }, (err, data) => {
+          time.measure.end(t, `Remove item from table ${this.table}`)
+          if (err) {
+            reject(err)
+          } else {
+            resolve()
+          }
+        })
+      }
     })
   }
 
