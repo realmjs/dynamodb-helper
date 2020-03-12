@@ -338,7 +338,9 @@ class DatabseHelper {
         }
       }
       if (params[table].projection) {
-        RequestItems[table].ProjectionExpression = params[table].projection.join(',')
+        const prj = createProjectionExpression(params[table].projection)
+        RequestItems[table].ProjectionExpression = prj.str
+        RequestItems[table].ExpressionAttributeNames = prj.attr
       }
     }
     return new Promise( (resolve, reject) => {
