@@ -48,6 +48,17 @@ function createKeyConditionExpression(keys) {
   const _vals = [':hval', ':rval']
   Object.keys(keys).forEach( (key, index) => {
     const _v = keys[key].trim()
+    // special process for BETWEEN keywork in range key
+    if (/^between/i.test(_v)) {
+      const s = _v.split(" ").filter(a => a.length > 0)
+      expr.attr.names[_keys[index]] = key
+      expr.attr.values[':rval1'] = isNaN(s[1])? s[1] : parseFloat(s[1])
+      expr.attr.values[':rval2'] = isNaN(s[3])? s[3] : parseFloat(s[3])
+      const value = `BETWEEN :rval1 AND :rval2`
+      if (index > 0) { expr.str += ' and ' }
+      expr.str += `${_keys[index]} ${value}`
+      return
+    }
     const _v_op = _v.match(/^\W+/)[0].trim()
     const _v_val = _v.match(/^\W+(.*)/)[1].trim()
     const value = `${_v_op} ${_vals[index]}`
