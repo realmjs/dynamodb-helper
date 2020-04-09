@@ -22,7 +22,11 @@ function createUpdateExpression(update) {
         /* create the value which is the rhs in the expression equation */
         const v = `:${p}v${index}`
         expr.str += ` ${path} = ${v},`
-        expr.attr.values[v] = isNaN(val) ? val : parseFloat(val)
+        if (val === true || val === false) {
+          expr.attr.values[v] = val
+        } else {
+          expr.attr.values[v] = isNaN(val) ? val : parseFloat(val)
+        }
       }
     })
   }
