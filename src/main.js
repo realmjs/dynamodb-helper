@@ -315,7 +315,7 @@ class DatabseHelper {
   addTable(table, options) {
     if ({}.toString.call(table)  === '[object Array]') {
       table.forEach( t => {
-        if ({}.toString.call(table)  === '[object Object]') {
+        if ({}.toString.call(t)  === '[object Object]') {
           this.drivers[t.table] = new DatabaseDriver(this.docClient, t.table, { ...this.config })
           if (t.indexes) {
             t.indexes.forEach( index => {
