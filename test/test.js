@@ -17,11 +17,34 @@ const dbh = new DatabaseHelper({
 })
 
 dbh.addTable('USERS', {indexes: ['LOGIN']})
-dbh.addTable(['ORDER', 'MEMBER'])
+dbh.addTable(['ORDER', 'MEMBER', {table: 'TEST', indexes: ['RESULT']}])
 
-dbh.drivers.MEMBER.remove({ uid: '220f71d0-2800-11ea-91a8-9f528720b885' }, ['rewards.welcome', 'rewards.booster'])
-.then( expr => log(expr))
-.catch(err => console.log(err))
+dbh.drivers.TEST.set(
+  { id: 'id' },
+  {
+    'content': {
+      'questions': {
+        '0' : {
+          'userAnswer': { '$1': 'Dragonborn' }
+        },
+        '1' : {
+          'userAnswer': { '$2': 'Awesome' }
+        },
+      }
+    }
+  },
+  {
+    'content': {
+      'questions': {
+        '$_index' : '$_value'
+      }
+    }
+  }
+).then(msg => console.log(JSON.stringify(msg,null,2)))
+
+// dbh.drivers.MEMBER.remove({ uid: '220f71d0-2800-11ea-91a8-9f528720b885' }, ['rewards.welcome', 'rewards.booster'])
+// .then( expr => log(expr))
+// .catch(err => console.log(err))
 
 // dbh.drivers.ORDER.find({ uid: '= 220f71d0-2800-11ea-91a8-9f528720b885' }, ['number'], null, {Limit: 2, ScanIndexForward: false})
 //          .then( expr => log(expr) )

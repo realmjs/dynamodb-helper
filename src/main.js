@@ -35,6 +35,87 @@ function createUpdateExpression(update) {
   return expr
 }
 
+/*
+  ex:
+  scheme = {
+    'content': {
+      'questions': {
+        '$_value'
+      }
+    }
+  }
+  update = {
+    'content': {
+      'questions': {
+        '0' : {
+          'userAnswer': { '$1': 'Dragonborn' }
+        }
+      }
+    }
+  }
+  expr = {
+    str: set #content.#questions =
+    attr: {
+      name: {
+        '#content': 'content',
+        '#questions': 'question',
+      }
+      value: {
+        ':value': {
+          '0' : {
+            'userAnswer': { '$1': 'Dragonborn' }
+          }
+        }
+      }
+    }
+  }
+*/
+function createSchemeUpdateExpression(update, schema) {
+  if (schema) {
+    const expr = { str: 'set ', attr: { names: {}, values: {} } };
+    const __recursive = (update, schema) => {
+      for (let prop in schema) {
+        const __schema = schema[prop];
+
+        if (/^\$_/.test(prop)) {
+          const _str = expr.str.replace(/^set/,'');
+          Object.keys(update).forEach ( (p, index) => {
+            expr.attr.names[`#p${p}`] = p;
+            expr.attr.values[`:v${p}`] = update[p];
+            if (index === 0) {
+              expr.str += `#p${p} = :v${p}, `;
+            } else {
+              expr.str += `${_str}#p${p} = :v${p}, `;
+            }
+          })
+        } else {
+          expr.attr.names[`#${prop}`] = prop;
+          expr.str += `#${prop}.`;
+        }
+
+        if ({}.toString.call(__schema)  === '[object Object]') {
+          __recursive(update[prop], __schema);
+        }
+      }
+    }
+    __recursive(update, schema);
+    expr.str = expr.str.trim().replace(/,$/,'');
+    return expr;
+  } else {
+    const expr = { str: 'set', attr: { names: {}, values: {} } }
+    // set
+    for (let key in update) {
+      const p = `#${key}`;
+      const v = `:${key}`;
+      expr.attr.names[p] = key;
+      expr.attr.values[v] = update[key];
+      expr.str += ` ${p} = ${v},`;
+    }
+    expr.str = expr.str.replace(/,$/,'');
+    return expr;
+  }
+}
+
 function createRemoveExpression(attributes) {
   const expr = { str: 'remove', attr: {} }
   attributes.forEach(key => {
@@ -200,18 +281,9 @@ class DatabaseDriver {
    * @param {Object} prop
    * @return Promise
    */
-  set(keys, prop) {
+  set(keys, update, schema) {
     return new Promise( (resolve, reject) => {
-      const expr = { str: 'set', attr: { names: {}, values: {} } }
-      // set
-      for (let key in prop) {
-        const p = `#${key}`
-        const v = `:${key}`
-        expr.attr.names[p] = key
-        expr.attr.values[v] = prop[key]
-        expr.str += ` ${p} = ${v},`
-      }
-      expr.str = expr.str.replace(/,$/,'')
+      const expr = createSchemeUpdateExpression(update, schema);
       const t = time.measure.start()
       this.docClient.update({
         TableName: this.table,
