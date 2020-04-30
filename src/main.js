@@ -297,7 +297,7 @@ class DatabaseDriver {
         if (err) {
           reject(err)
         } else {
-          resolve(prop)
+          resolve(update)
         }
       })
     })
@@ -391,7 +391,7 @@ class DatabseHelper {
           this.drivers[t.table] = new DatabaseDriver(this.docClient, t.table, { ...this.config })
           if (t.indexes) {
             t.indexes.forEach( index => {
-              this.drivers[index] = new DatabaseDriver(this.docClient, t.table, { index: t.index, ...this.config })
+              this.drivers[index] = new DatabaseDriver(this.docClient, t.table, { index: index, ...this.config })
             })
           }
         } else {
